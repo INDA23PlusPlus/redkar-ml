@@ -101,24 +101,23 @@ def test_NN(iterations):
     print("Accuracy:", total/correct)
 
 def gradient_descent():
-    changes_weights_input_1 = np.zeros(16, 784)
-    changes_bias_1 = np.zeros(16, 1)
-    changes_weights_1_2 = np.zeros(16, 16)
-    changes_bias_2 = np.zeros(16, 1)
-    changes_weights_2_output = np.zeros(10, 16)
-    changes_bias_output = np.zeros(10, 1)
+    changes_weights_input_1 = np.zeros((16, PIXELS))
+    changes_bias_1 = np.zeros((16, 1))
+    changes_weights_1_2 = np.zeros((16, 16))
+    changes_bias_2 = np.zeros((16, 1))
+    changes_weights_2_output = np.zeros((10, 16))
+    changes_bias_output = np.zeros((10, 1))
      
     for _ in range(PER_DESCENT):
         ind = np.random.randint(len(train_data)) # the index of value you want to give the NN to help itself with
         optimal = np.zeros(len(output_neurons))
         Z = np.zeros(len(output_neurons))
 
-        for i in range(len(optimal_vector)):
+        for i in range(len(optimal)):
             if i == ind:
-                optimal_vector[i] = 1
+                optimal[i] = 1
             else:
-                optimal_vector[i] = 0
-
+                optimal[i] = 0
         forward_propagation(train_data[ind])
 
         cost_vector = np.zeros(len(output_neurons))
@@ -126,7 +125,7 @@ def gradient_descent():
             cost_vector[i] = output_neurons[i] - optimal[i];
 
         for i in range(len(output_neurons)):
-            z[i] = layer_2_neurons.dot(weights_2_output[i]) + bias_output[i]
+            Z[i] = layer_2_neurons.dot(weights_2_output[i]) + bias_output[i]
 
         # TODO: remember to average out the additions on the 6 vectors above
     
@@ -134,24 +133,24 @@ def gradient_descent():
         for i in range(len(output_neurons)):
             for j in range(len(changes_weights_2_output)):
                 val = layer_2_neurons[j]
-                val *= sigmoid_prime(z[i])
-                val *= 2 * cost[i]
+                val *= sigmoid_prime(Z[i])
+                val *= 2 * cost_vector[i]
                 changes_weights_2_output[i][j] += val
 
         # adding cost-bias derivatives for last layer
         for i in range(len(output_neurons)):
             val = 1
-            val *= sigmoid_prime(z[i])
-            val *= 2 * cost[i]
+            val *= sigmoid_prime(Z[i])
+            val *= 2 * cost_vector[i]
             changes_bias_output[j] += val
 
         optimal = np.zeros(len(layer_2_neurons))
         for i in range(len(layer_2_neurons)):
             sum = 0
-            for j in range(len(output_layer)):
+            for j in range(len(output_neurons)):
                 val = weights_2_output[j][i] # TODO: check this
-                val *= sigmoid_prime(z[j])
-                val *= 2 * cost[j]
+                val *= sigmoid_prime(Z[j])
+                val *= 2 * cost_vector[j]
                 sum += val
             optimal[i] = sum
 
@@ -163,21 +162,21 @@ def gradient_descent():
 
         Z = np.zeros(len(layer_2_neurons))
         for i in range(len(layer_2_neurons)):
-            z[i] = layer_1_neurons.dot(weights_1_2[i]) + bias_2[i]
+            Z[i] = layer_1_neurons.dot(weights_1_2[i]) + bias_2[i]
 
         # adding cost-weight derivatives for 2nd hidden layer
         for i in range(len(layer_2_neurons)):
             for j in range(len(changes_weights_1_2)):
                 val = layer_1_neurons[j]
-                val *= sigmoid_prime(z[i])
-                val *= 2 * cost[i]
+                val *= sigmoid_prime(Z[i])
+                val *= 2 * cost_vector[i]
                 changes_weights_1_2[i][j] += val
 
         # adding cost-bias derivatives for 2nd hidden layer
         for i in range(len(layer_2_neurons)):
             val = 1
-            val *= sigmoid_prime(z[i])
-            val *= 2 * cost[i]
+            val *= sigmoid_prime(Z[i])
+            val *= 2 * cost_vector[i]
             changes_bias_2[j] += val
 
         optimal = np.zeros(len(layer_1_neurons))
@@ -185,8 +184,8 @@ def gradient_descent():
             sum = 0
             for j in range(len(layer_2_neurons)): 
                 val = weights_1_2[j][i] # TODO: check this j i nonsense
-                val *= sigmoid_prime(z[j])
-                val *= 2 * cost[j]
+                val *= sigmoid_prime(Z[j])
+                val *= 2 * cost_vector[j]
                 sum += val
             optimal[i] = sum
         
@@ -198,21 +197,21 @@ def gradient_descent():
 
         Z = np.zeros(len(layer_1_neurons))
         for i in range(len(layer_1_neurons)):
-            z[i] = input_neurons.dot(weights_input_1[i]) + bias_1[i]
+            Z[i] = input_neurons.dot(weights_input_1[i]) + bias_1[i]
 
         # adding cost-weight derivatives for 1st hidden layer
         for i in range(len(layer_1_neurons)):
             for j in range(len(changes_weights_input_1)):
                 val = input_neurons[j]
-                val *= sigmoid_prime(z[i])
-                val *= 2 * cost[i]
+                val *= sigmoid_prime(Z[i])
+                val *= 2 * cost_vector[i]
                 changes_weights_input_1[i][j] += val
 
         # adding cost-bias derivatives for 1st hidden layer
         for i in range(len(layer_1_neurons)):
             val = 1
-            val *= sigmoid_prime(z[i])
-            val *= 2 * cost[i]
+            val *= sigmoid_prime(Z[i])
+            val *= 2 * cost_vector[i]
             changes_bias_1[j] += val
 
     changes_weights_input_1 = np.divide(changes_weights_input_1, PER_DESCENT)
