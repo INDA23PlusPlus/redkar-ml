@@ -29,28 +29,30 @@ test_labels = labels[(n-10000):n]
 
 # will use sigmoid, so weights and biases should be in ~[-0.5, 0.5]
 weights_input_1 = np.random.rand(16, PIXELS) - 0.5
-bias_1 = np.random.rand(16, 1) - 0.5
+bias_1 = np.random.rand(16) - 0.5
 weights_1_2 = np.random.rand(16, 16) - 0.5
-bias_2 = np.random.rand(16, 1) - 0.5
+bias_2 = np.random.rand(16) - 0.5
 weights_2_output = np.random.rand(10, 16) - 0.5
-bias_output = np.random.rand(10, 1) - 0.5
+bias_output = np.random.rand(10) - 0.5
 
 # these are the nodes / neurons in the neural network
 input_neurons = np.random.rand(784)
 layer_1_neurons = np.random.rand(16)
 layer_2_neurons = np.random.rand(16)
 output_neurons = np.random.rand(10)
-print("layer_1_neurons:",layer_1_neurons)
 
 def random_weight_bias():
     weights_input_1 = np.random.rand(16, PIXELS) - 0.5
-    bias_1 = np.random.rand(16, 1) - 0.5
+    bias_1 = np.random.rand(16) - 0.5
     weights_1_2 = np.random.rand(16, 16) - 0.5
-    bias_2 = np.random.rand(16, 1) - 0.5
+    bias_2 = np.random.rand(16) - 0.5
     weights_2_output = np.random.rand(10, 16) - 0.5
-    bias_output = np.random.rand(10, 1) - 0.5
+    bias_output = np.random.rand(10) - 0.5
 
 def sigmoid(z):
+    # trying to fix overflow with rearranged sigmoid depending on sign
+    if z < 0:
+        return (np.exp(z) / 1 + np.exp(z)) # slightly unsure of the correct of this
     return (1 / (1 + np.exp(-z))) 
 
 def sigmoid_prime(z):
@@ -102,14 +104,15 @@ def test_NN(iterations):
 
 def gradient_descent():
     changes_weights_input_1 = np.zeros((16, PIXELS))
-    changes_bias_1 = np.zeros((16, 1))
+    changes_bias_1 = np.zeros(16)
     changes_weights_1_2 = np.zeros((16, 16))
-    changes_bias_2 = np.zeros((16, 1))
+    changes_bias_2 = np.zeros(16)
     changes_weights_2_output = np.zeros((10, 16))
-    changes_bias_output = np.zeros((10, 1))
+    changes_bias_output = np.zeros(10)
      
     for _ in range(PER_DESCENT):
         ind = np.random.randint(len(train_data)) # the index of value you want to give the NN to help itself with
+        forward_propagation(train_data[ind])
         optimal = np.zeros(len(output_neurons))
         Z = np.zeros(len(output_neurons))
 
@@ -118,7 +121,6 @@ def gradient_descent():
                 optimal[i] = 1
             else:
                 optimal[i] = 0
-        forward_propagation(train_data[ind])
 
         cost_vector = np.zeros(len(output_neurons))
         for i in range(len(output_neurons)):
@@ -244,5 +246,9 @@ def brrr():
     for _ in range(DESCENTS):
         gradient_descent()
         test_NN(PER_DESCENT) # <- no specific reason for setting this equal to the PER_DESCENT
-
 brrr()
+
+# print(weights_1_2)
+# print(bias_2)
+# print(weights_2_output)
+# print(bias_output)
